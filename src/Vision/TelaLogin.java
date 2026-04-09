@@ -1,57 +1,81 @@
 package Vision;
 
-import javax.swing.JPanel;
+import Controller.UsuarioController;
+import Model.Usuario;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+
+import javax.swing.*;
 
 public class TelaLogin extends JPanel {
 
-	private static final long serialVersionUID = 1L;
-	private JTextField textField;
-	private JTextField textField_1;
-	private JButton btnLogin;
-	private JButton btnCadastro;
-			
-	
+    private static final long serialVersionUID = 1L;
 
-		
+    private final Janela janela;
+    private final UsuarioController controller = new UsuarioController();
 
-	/**
-	 * Create the panel.
-	 */
-	public TelaLogin() {
-		setLayout(new MigLayout("", "[][][][][][][grow]", "[][][][][][][][][][]"));
-		
-		JLabel lbNome = new JLabel("Insira seu nome: ");
-		add(lbNome, "cell 0 1");
-		
-		textField = new JTextField();
-		add(textField, "cell 4 1,growx");
-		textField.setColumns(10);
-		
-		JLabel lbCpf = new JLabel("Insira seu CPF:");
-		add(lbCpf, "cell 0 3");
-		
-		textField_1 = new JTextField();
-		add(textField_1, "cell 4 3,growx");
-		textField_1.setColumns(10);
-		
-		btnCadastro = new JButton("Cadastro");
-		btnCadastro.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				TelaCadastroUsuarios Cadastro = new TelaCadastroUsuarios();
-				Cadastro.setVisible(true);
-			}
-		});
-		
-		btnLogin = new JButton("Login");
-		add(btnLogin, "cell 2 7");
-		add(btnCadastro, "cell 5 7");
+    private JTextField tfNome;
+    private JTextField tfCpf;
 
-	}
+    public TelaLogin(Janela janela) {
+        this.janela = janela;
+        setLayout(new MigLayout("insets 40", "[right][grow]", "[]20[]20[]20[]"));
 
+        // Título
+        JLabel titulo = new JLabel("Login - Supermercado");
+        titulo.setFont(titulo.getFont().deriveFont(18f));
+        add(titulo, "span 2, center, wrap 30");
+
+        // Nome
+        add(new JLabel("Nome:"), "");
+        tfNome = new JTextField(20);
+        add(tfNome, "growx, wrap");
+
+        // CPF
+        add(new JLabel("CPF:"), "");
+        tfCpf = new JTextField(20);
+        add(tfCpf, "growx, wrap 30");
+
+        // Botões
+        JButton btnLogin = new JButton("Entrar");
+        JButton btnCadastro = new JButton("Cadastrar-se");
+
+        add(btnLogin,    "split 2, center");
+        add(btnCadastro, "wrap");
+
+        // ── Actions ────────────────────────────────────────────────────────
+
+        btnLogin.addActionListener(e -> realizarLogin());
+
+        // Também permite Enter no campo CPF
+        tfCpf.addActionListener(e -> realizarLogin());
+
+        btnCadastro.addActionListener(e -> janela.mostrarTela("cadastroUsuario"));
+    }
+
+    private void realizarLogin() {
+        String nome = tfNome.getText().trim();
+        String cpf  = tfCpf.getText().trim();
+
+        if (nome.isEmpty() || cpf.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Preencha o nome e o CPF para entrar.",
+                "Campos obrigatórios", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Usuario usuario = controller.login(nome, cpf);
+        if (usuario == null) {
+            JOptionPane.showMessageDialog(this,
+                "Usuário não encontrado. Verifique os dados ou cadastre-se.",
+                "Login inválido", JOptionPane.ERROR_MESSAGE);
+        } else {
+            limparCampos();
+            janela.aposLogin(usuario);
+        }
+    }
+
+    public void limparCampos() {
+        tfNome.setText("");
+        tfCpf.setText("");
+    }
 }

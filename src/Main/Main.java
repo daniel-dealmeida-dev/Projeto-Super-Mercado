@@ -1,19 +1,20 @@
 package Main;
 
 import Vision.Janela;
-import Vision.TelaCadastroProdutos;
-import Vision.TelaLogin;
+
+import javax.swing.*;
 
 public class Main {
 
-	public static void main(String[] args) {
-	
-	//	TelaCadastroProdutos cadastroProdutos = new TelaCadastroProdutos();
-		TelaLogin telaLogin = new TelaLogin();
-		
-		Janela janela = new Janela(telaLogin);
-		janela.setVisible(true);
+    public static void main(String[] args) {
+        // Garante execução na Event Dispatch Thread do Swing
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception ignored) {}
 
-	}
-
+            Janela janela = new Janela();
+            janela.setVisible(true);
+        });
+    }
 }
