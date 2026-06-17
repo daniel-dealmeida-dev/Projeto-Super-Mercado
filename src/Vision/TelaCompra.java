@@ -104,9 +104,15 @@ public class TelaCompra extends JPanel {
         btnRemoverItem.addActionListener(e -> removerDoCarrinho());
         btnFinalizar.addActionListener(e -> finalizarCompra());
         btnSair.addActionListener(e -> {
-            supermercado.limparCarrinho();
-            atualizarCarrinho();
-            janela.deslogar();
+            try {
+                supermercado.limparCarrinho();
+                atualizarCarrinho();
+                janela.deslogar();
+            } catch (Exception ex) {
+                System.out.println("Erro ao sair / deslogar: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this,
+                    "Erro ao sair: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 
@@ -115,26 +121,38 @@ public class TelaCompra extends JPanel {
     }
 
     public void carregarProdutos() {
-        modelProdutos.setRowCount(0);
-        List<Produto> lista = produtoController.listarTodos();
-        for (Produto p : lista) {
-            if (p.getQuantidade() > 0) {
-                modelProdutos.addRow(new Object[]{
-                    p.getId(), p.getNome(), p.getDescricao(),
-                    String.format("R$ %.2f", p.getPreco()), p.getQuantidade()
-                });
+        try {
+            modelProdutos.setRowCount(0);
+            List<Produto> lista = produtoController.listarTodos();
+            for (Produto p : lista) {
+                if (p.getQuantidade() > 0) {
+                    modelProdutos.addRow(new Object[]{
+                        p.getId(), p.getNome(), p.getDescricao(),
+                        String.format("R$ %.2f", p.getPreco()), p.getQuantidade()
+                    });
+                }
             }
+        } catch (Exception e) {
+            System.out.println("Erro ao carregar produtos disponíveis: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "Erro ao carregar produtos: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void mostrarDetalhe() {
-        int linha = tabelaProdutos.getSelectedRow();
-        if (linha < 0) return;
-        String msg = "Nome: "      + modelProdutos.getValueAt(linha, 1) + "\n" +
-                     "Descrição: " + modelProdutos.getValueAt(linha, 2) + "\n" +
-                     "Preço: "     + modelProdutos.getValueAt(linha, 3) + "\n" +
-                     "Estoque: "   + modelProdutos.getValueAt(linha, 4);
-        JOptionPane.showMessageDialog(this, msg, "Detalhes do Produto", JOptionPane.INFORMATION_MESSAGE);
+        try {
+            int linha = tabelaProdutos.getSelectedRow();
+            if (linha < 0) return;
+            String msg = "Nome: "      + modelProdutos.getValueAt(linha, 1) + "\n" +
+                         "Descrição: " + modelProdutos.getValueAt(linha, 2) + "\n" +
+                         "Preço: "     + modelProdutos.getValueAt(linha, 3) + "\n" +
+                         "Estoque: "   + modelProdutos.getValueAt(linha, 4);
+            JOptionPane.showMessageDialog(this, msg, "Detalhes do Produto", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            System.out.println("Erro ao mostrar detalhe do produto: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "Erro ao exibir detalhes: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void adicionarAoCarrinho() {
@@ -153,6 +171,10 @@ public class TelaCompra extends JPanel {
             atualizarCarrinho();
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Estoque insuficiente", JOptionPane.WARNING_MESSAGE);
+        } catch (Exception ex) {
+            System.out.println("Erro ao adicionar produto ao carrinho: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "Erro ao adicionar produto: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -162,26 +184,38 @@ public class TelaCompra extends JPanel {
             JOptionPane.showMessageDialog(this, "Selecione um item no carrinho.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        String nomeProduto = (String) modelCarrinho.getValueAt(linha, 0);
-        for (Produto p : supermercado.getProdutosNoCarrinho()) {
-            if (p.getNome().equals(nomeProduto)) {
-                supermercado.removerProduto(p);
-                break;
+        try {
+            String nomeProduto = (String) modelCarrinho.getValueAt(linha, 0);
+            for (Produto p : supermercado.getProdutosNoCarrinho()) {
+                if (p.getNome().equals(nomeProduto)) {
+                    supermercado.removerProduto(p);
+                    break;
+                }
             }
+            atualizarCarrinho();
+        } catch (Exception e) {
+            System.out.println("Erro ao remover produto do carrinho: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "Erro ao remover produto do carrinho: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
-        atualizarCarrinho();
     }
 
     private void atualizarCarrinho() {
-        modelCarrinho.setRowCount(0);
-        Map<Produto, Integer> carrinho = supermercado.getCarrinho();
-        for (Map.Entry<Produto, Integer> entry : carrinho.entrySet()) {
-            Produto p = entry.getKey();
-            int qtd = entry.getValue();
-            double sub = p.getPreco() * qtd;
-            modelCarrinho.addRow(new Object[]{p.getNome(), qtd, String.format("R$ %.2f", sub)});
+        try {
+            modelCarrinho.setRowCount(0);
+            Map<Produto, Integer> carrinho = supermercado.getCarrinho();
+            for (Map.Entry<Produto, Integer> entry : carrinho.entrySet()) {
+                Produto p = entry.getKey();
+                int qtd = entry.getValue();
+                double sub = p.getPreco() * qtd;
+                modelCarrinho.addRow(new Object[]{p.getNome(), qtd, String.format("R$ %.2f", sub)});
+            }
+            lblTotal.setText(String.format("Total: R$ %.2f", supermercado.calcularTotal()));
+        } catch (Exception e) {
+            System.out.println("Erro ao atualizar carrinho na tela: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "Erro ao atualizar carrinho: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
-        lblTotal.setText(String.format("Total: R$ %.2f", supermercado.calcularTotal()));
     }
 
     private void finalizarCompra() {
@@ -202,34 +236,41 @@ public class TelaCompra extends JPanel {
                 produtoController.atualizarEstoque(p.getId(), novaQtd);
             }
         } catch (Exception ex) {
+            System.out.println("Erro ao atualizar estoque após compra: " + ex.getMessage());
             JOptionPane.showMessageDialog(this, "Erro ao atualizar estoque: " + ex.getMessage(),
                 "Erro", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         // Emite nota fiscal
-        StringBuilder nota = new StringBuilder();
-        nota.append("===== NOTA FISCAL =====\n");
-        nota.append("Cliente: ").append(usuarioLogado.getNome()).append("\n");
-        nota.append("CPF: ").append(usuarioLogado.getCpf()).append("\n");
-        nota.append("-----------------------\n");
-        for (Map.Entry<Produto, Integer> entry : supermercado.getCarrinho().entrySet()) {
-            Produto p = entry.getKey();
-            int qtd = entry.getValue();
-            nota.append(String.format("%-20s x%d  R$ %.2f\n", p.getNome(), qtd, p.getPreco() * qtd));
+        try {
+            StringBuilder nota = new StringBuilder();
+            nota.append("===== NOTA FISCAL =====\n");
+            nota.append("Cliente: ").append(usuarioLogado.getNome()).append("\n");
+            nota.append("CPF: ").append(usuarioLogado.getCpf()).append("\n");
+            nota.append("-----------------------\n");
+            for (Map.Entry<Produto, Integer> entry : supermercado.getCarrinho().entrySet()) {
+                Produto p = entry.getKey();
+                int qtd = entry.getValue();
+                nota.append(String.format("%-20s x%d  R$ %.2f\n", p.getNome(), qtd, p.getPreco() * qtd));
+            }
+            nota.append("-----------------------\n");
+            nota.append(String.format("TOTAL: R$ %.2f\n", supermercado.calcularTotal()));
+            nota.append("=======================");
+
+            JTextArea ta = new JTextArea(nota.toString());
+            ta.setEditable(false);
+            ta.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
+            JOptionPane.showMessageDialog(this, new JScrollPane(ta), "Nota Fiscal", JOptionPane.INFORMATION_MESSAGE);
+
+            supermercado.limparCarrinho();
+            atualizarCarrinho();
+            carregarProdutos(); // Recarrega estoque atualizado
+            JOptionPane.showMessageDialog(this, "Compra realizada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            System.out.println("Erro ao emitir nota fiscal: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "Erro ao emitir nota fiscal: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
-        nota.append("-----------------------\n");
-        nota.append(String.format("TOTAL: R$ %.2f\n", supermercado.calcularTotal()));
-        nota.append("=======================");
-
-        JTextArea ta = new JTextArea(nota.toString());
-        ta.setEditable(false);
-        ta.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
-        JOptionPane.showMessageDialog(this, new JScrollPane(ta), "Nota Fiscal", JOptionPane.INFORMATION_MESSAGE);
-
-        supermercado.limparCarrinho();
-        atualizarCarrinho();
-        carregarProdutos(); // Recarrega estoque atualizado
-        JOptionPane.showMessageDialog(this, "Compra realizada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
     }
 }

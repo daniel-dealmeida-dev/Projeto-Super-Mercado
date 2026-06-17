@@ -123,8 +123,10 @@ public class TelaCadastroProdutos extends JPanel {
             carregarTabela();
 
         } catch (NumberFormatException ex) {
+            System.out.println("Valor inválido no formulário de produto: " + ex.getMessage());
             JOptionPane.showMessageDialog(this, "Preço e quantidade devem ser números válidos.", "Erro", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
+            System.out.println("Erro ao salvar produto: " + ex.getMessage());
             JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -139,31 +141,46 @@ public class TelaCadastroProdutos extends JPanel {
         int confirm = JOptionPane.showConfirmDialog(this,
             "Deseja remover o produto selecionado?", "Confirmar remoção", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
-            controller.remover(id);
-            JOptionPane.showMessageDialog(this, "Produto removido.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-            limparFormulario();
-            carregarTabela();
+            try {
+                controller.remover(id);
+                JOptionPane.showMessageDialog(this, "Produto removido.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                limparFormulario();
+                carregarTabela();
+            } catch (Exception ex) {
+                System.out.println("Erro ao remover produto: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Erro ao remover produto: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
     private void carregarSelecionadoNoForm() {
-        int linha = tabela.getSelectedRow();
-        if (linha < 0) return;
-        idSelecionado = (int) tableModel.getValueAt(linha, 0);
-        tfNome.setText((String) tableModel.getValueAt(linha, 1));
-        tfDescricao.setText((String) tableModel.getValueAt(linha, 2));
-        tfPreco.setText(tableModel.getValueAt(linha, 3).toString());
-        tfQuantidade.setText(tableModel.getValueAt(linha, 4).toString());
+        try {
+            int linha = tabela.getSelectedRow();
+            if (linha < 0) return;
+            idSelecionado = (int) tableModel.getValueAt(linha, 0);
+            tfNome.setText((String) tableModel.getValueAt(linha, 1));
+            tfDescricao.setText((String) tableModel.getValueAt(linha, 2));
+            tfPreco.setText(tableModel.getValueAt(linha, 3).toString());
+            tfQuantidade.setText(tableModel.getValueAt(linha, 4).toString());
+        } catch (Exception e) {
+            System.out.println("Erro ao carregar produto selecionado no formulário: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produto para edição: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public void carregarTabela() {
-        tableModel.setRowCount(0);
-        List<Produto> produtos = controller.listarTodos();
-        for (Produto p : produtos) {
-            tableModel.addRow(new Object[]{
-                p.getId(), p.getNome(), p.getDescricao(),
-                String.format("%.2f", p.getPreco()), p.getQuantidade()
-            });
+        try {
+            tableModel.setRowCount(0);
+            List<Produto> produtos = controller.listarTodos();
+            for (Produto p : produtos) {
+                tableModel.addRow(new Object[]{
+                    p.getId(), p.getNome(), p.getDescricao(),
+                    String.format("%.2f", p.getPreco()), p.getQuantidade()
+                });
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao carregar tabela de produtos: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 

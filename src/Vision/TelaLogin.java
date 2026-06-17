@@ -53,29 +53,40 @@ public class TelaLogin extends JPanel {
     }
 
     private void realizarLogin() {
-        String nome = tfNome.getText().trim();
-        String cpf  = tfCpf.getText().trim();
+        try {
+            String nome = tfNome.getText().trim();
+            String cpf  = tfCpf.getText().trim();
 
-        if (nome.isEmpty() || cpf.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                "Preencha o nome e o CPF para entrar.",
-                "Campos obrigatórios", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
+            if (nome.isEmpty() || cpf.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Preencha o nome e o CPF para entrar.",
+                    "Campos obrigatórios", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
-        Usuario usuario = controller.login(nome, cpf);
-        if (usuario == null) {
+            Usuario usuario = controller.login(nome, cpf);
+            if (usuario == null) {
+                JOptionPane.showMessageDialog(this,
+                    "Usuário não encontrado. Verifique os dados ou cadastre-se.",
+                    "Login inválido", JOptionPane.ERROR_MESSAGE);
+            } else {
+                limparCampos();
+                janela.aposLogin(usuario);
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao realizar login: " + e.getMessage());
             JOptionPane.showMessageDialog(this,
-                "Usuário não encontrado. Verifique os dados ou cadastre-se.",
-                "Login inválido", JOptionPane.ERROR_MESSAGE);
-        } else {
-            limparCampos();
-            janela.aposLogin(usuario);
+                "Erro inesperado ao realizar login: " + e.getMessage(),
+                "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public void limparCampos() {
-        tfNome.setText("");
-        tfCpf.setText("");
+        try {
+            tfNome.setText("");
+            tfCpf.setText("");
+        } catch (Exception e) {
+            System.out.println("Erro ao limpar campos do login: " + e.getMessage());
+        }
     }
 }

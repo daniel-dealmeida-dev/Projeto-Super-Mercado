@@ -69,6 +69,7 @@ public class TelaCadastroUsuarios extends JPanel {
                     "CPF já cadastrado. Tente fazer login.", "CPF duplicado", JOptionPane.WARNING_MESSAGE);
             }
         } catch (Exception ex) {
+            System.out.println("Erro ao cadastrar usuário: " + ex.getMessage());
             JOptionPane.showMessageDialog(this,
                 "Erro ao cadastrar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }

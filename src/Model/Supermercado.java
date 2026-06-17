@@ -16,7 +16,7 @@ public class Supermercado {
         carrinho = new HashMap<>();
     }
 
-    /** Singleton - um único supermercado por sessão */
+   
     public static Supermercado getInstancia() {
         if (instancia == null) {
             instancia = new Supermercado();
@@ -24,52 +24,97 @@ public class Supermercado {
         return instancia;
     }
 
-    // ── Carrinho ────────────────────────────────────────────────────────────
+    // Carrinho
 
     public void adicionarProduto(Produto produto, int quantidade) {
         if (produto.getQuantidade() < quantidade) {
             throw new IllegalArgumentException("Quantidade solicitada maior que o estoque disponível.");
         }
-        carrinho.merge(produto, quantidade, Integer::sum);
+        try {
+            carrinho.merge(produto, quantidade, Integer::sum);
+        } catch (Exception e) {
+            System.out.println("Erro ao adicionar produto ao carrinho: " + e.getMessage());
+            throw new RuntimeException("Erro ao adicionar produto ao carrinho.", e);
+        }
     }
 
     public void removerProduto(Produto produto) {
-        carrinho.remove(produto);
+        try {
+            carrinho.remove(produto);
+        } catch (Exception e) {
+            System.out.println("Erro ao remover produto do carrinho: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover produto do carrinho.", e);
+        }
     }
 
     public void alterarQuantidade(Produto produto, int novaQuantidade) {
-        if (novaQuantidade <= 0) {
-            removerProduto(produto);
-        } else {
-            carrinho.put(produto, novaQuantidade);
+        try {
+            if (novaQuantidade <= 0) {
+                removerProduto(produto);
+            } else {
+                carrinho.put(produto, novaQuantidade);
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao alterar quantidade no carrinho: " + e.getMessage());
+            throw new RuntimeException("Erro ao alterar quantidade no carrinho.", e);
         }
     }
 
     public void limparCarrinho() {
-        carrinho.clear();
+        try {
+            carrinho.clear();
+        } catch (Exception e) {
+            System.out.println("Erro ao limpar o carrinho: " + e.getMessage());
+            throw new RuntimeException("Erro ao limpar o carrinho.", e);
+        }
     }
 
     public Map<Produto, Integer> getCarrinho() {
-        return new HashMap<>(carrinho);
+        try {
+            return new HashMap<>(carrinho);
+        } catch (Exception e) {
+            System.out.println("Erro ao obter o carrinho: " + e.getMessage());
+            throw new RuntimeException("Erro ao obter o carrinho.", e);
+        }
     }
 
     public List<Produto> getProdutosNoCarrinho() {
-        return new ArrayList<>(carrinho.keySet());
+        try {
+            return new ArrayList<>(carrinho.keySet());
+        } catch (Exception e) {
+            System.out.println("Erro ao listar produtos do carrinho: " + e.getMessage());
+            throw new RuntimeException("Erro ao listar produtos do carrinho.", e);
+        }
     }
 
     public int getQuantidadeNoCarrinho(Produto produto) {
-        return carrinho.getOrDefault(produto, 0);
+        try {
+            return carrinho.getOrDefault(produto, 0);
+        } catch (Exception e) {
+            System.out.println("Erro ao obter quantidade do produto no carrinho: " + e.getMessage());
+            throw new RuntimeException("Erro ao obter quantidade do produto no carrinho.", e);
+        }
     }
 
     public double calcularTotal() {
-        double total = 0;
-        for (Map.Entry<Produto, Integer> entry : carrinho.entrySet()) {
-            total += entry.getKey().getPreco() * entry.getValue();
+        try {
+            double total = 0;
+            for (Map.Entry<Produto, Integer> entry : carrinho.entrySet()) {
+                total += entry.getKey().getPreco() * entry.getValue();
+            }
+            return total;
+        } catch (Exception e) {
+            System.out.println("Erro ao calcular total do carrinho: " + e.getMessage());
+            throw new RuntimeException("Erro ao calcular total do carrinho.", e);
         }
-        return total;
     }
 
     public boolean isCarrinhoVazio() {
-        return carrinho.isEmpty();
+        try {
+            return carrinho.isEmpty();
+        } catch (Exception e) {
+            System.out.println("Erro ao verificar se o carrinho está vazio: " + e.getMessage());
+            throw new RuntimeException("Erro ao verificar carrinho.", e);
+        }
     }
 }
