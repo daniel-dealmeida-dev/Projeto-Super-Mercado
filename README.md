@@ -171,7 +171,4 @@ Iniciar aplicação
 
 ## ⚠️ Observações
 
-- A conexão com o banco é um **Singleton** — apenas uma conexão JDBC fica aberta por sessão.
-- O carrinho (`Supermercado`) também é Singleton; ao deslogar, o carrinho é limpo automaticamente.
 - O estoque é decrementado no banco no momento da finalização da compra.
-- Não há criptografia de senha — a autenticação é feita apenas por nome + CPF. Recomenda-se adicionar hashing para ambientes de produção.
